@@ -1,0 +1,33 @@
+# Core Dependencies
+langgraph>=0.0.1
+langchain>=0.1.0
+python-dotenv>=1.0.0
+
+# API Clients
+openai>=1.0.0
+requests>=2.31.0
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Utilities
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+pyyaml>=6.0
+
+# Async
+aiohttp>=3.8.0
+asyncio>=3.4.3
+
+# Logging
+colorlog>=6.7.0
+
+# Development (optional)
+# Uncomment these for development:
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
+# flake8>=6.0.0
+# mypy>=1.4.0
+# pre-commit>=3.3.0
