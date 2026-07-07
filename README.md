@@ -1,16 +1,21 @@
-# Danny AI OS 🤖
+# Danny AI OS
 
-My Personal AI Operating System built with Python + LangGraph.
+A modular personal AI operating system built with Python + LangGraph.
 
-## Features
+## Structure
+- system/ - master system prompt (single source of truth)
+- agents/ - agent definitions (deltas only)
+- policies/ - memory and tool policies
+- workflows/ - reusable task workflows
+- docs/ - documentation and status
 
-- 🧠 Manager Agent
-- 🔍 Research Agent
-- 💻 Coding Agent
-- ✍️ Writing Agent
-- ✅ Review Agent
+## Agents
+Manager, Research, Coding, Writing, Review.
 
 ## Run
-
-```bash
 python app.py
+
+## Rules
+1. Precedence: Safety > Core > Agent > Task > Memory
+2. Agents add capabilities, never override the core
+3. Runtime data (logs, memory) stays out of version control
