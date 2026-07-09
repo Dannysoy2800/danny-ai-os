@@ -5,7 +5,7 @@ python-dotenv>=1.0.0
 
 # API Clients
 openai>=1.0.0
-requests>=2.31.0
+requests>=2.34.2
 
 # Data Processing
 pandas>=2.0.0
