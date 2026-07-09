@@ -1,0 +1,27 @@
+# Code Owners - who to ask for review on different parts
+# See https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Main codebase
+* @Dannysoy2800
+
+# Core system
+/system/ @Dannysoy2800
+
+# Agents
+/agents/ @Dannysoy2800
+
+# Policies
+/policies/ @Dannysoy2800
+
+# Workflows
+/workflows/ @Dannysoy2800
+
+# Documentation
+/docs/ @Dannysoy2800
+README.md @Dannysoy2800
+CONTRIBUTING.md @Dannysoy2800
+
+# Configuration
+Makefile @Dannysoy2800
+pyproject.toml @Dannysoy2800
+requirements*.txt @Dannysoy2800
