@@ -24,4 +24,4 @@ myst-parser>=1.0.0
 # Development
 ipython>=8.14.0
 ipdb>=0.13.0
-python-dotenv>=1.0.0
+python-dotenv>=1.2.2
