@@ -8,7 +8,7 @@ openai>=2.46.0
 requests>=2.34.2
 
 # Data Processing
-pandas>=3.0.3
+pandas>=2.2.0 requests>=2.32.0
 numpy>=1.24.0
 
 # Utilities
