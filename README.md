@@ -1,153 +1,106 @@
-# 🧠 Danny AI OS
+# 💻 Danny AI OS
 
-> **Modular personal AI operating system** powered by Python + LangGraph
+> Personal AI Operating System - Python-based intelligent automation platform
 
-A sophisticated multi-agent AI system with state-based orchestration, safety-first architecture, and pluggable agent/policy systems.
+[![Python](https://img.shields.io/badge/Python-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.md)
+[![LangGraph](https://img.shields.io/badge/LangGraph-Enabled-purple)](https://github.com/topics/langgraph)
+[![Status](https://img.shields.io/badge/Status-Active%20Development-green)](https://github.com/Dannysoy2800/danny-ai-os)
 
-## ✨ Key Features
+## 📋 Overview
 
-- **Multi-Agent Architecture**: Manager, Research, Coding, Writing, Review agents
-- **State-Based Workflows**: LangGraph powered orchestration
-- **Safety-First Design**: Precedence: Safety > Core > Agent > Task > Memory
-- **Pluggable System**: Add agents and policies without overriding core
-- **Production-Ready**: Async support, comprehensive logging, error handling
+A comprehensive **Personal AI Operating System** that serves as an intelligent automation platform. This project combines Python's power with modern AI frameworks to create a personalized AI assistant ecosystem.
+
+### ✅ What's Implemented
+
+- 🏗️ **Solid Foundation** - Complete project structure with 17+ files
+- 🐍 **Python Application** - Core `app.py` with main functionality
+- 🔧 **Build System** - `Makefile` for easy development workflow
+- 📦 **Dependencies** - `requirements.txt` & `requirements-dev.txt`
+- 🔒 **MIT Licensed** - Open source and professional
+- ⚙️ **Configuration** - `.env.example`, `.editorconfig`, pre-commit hooks
+- 📁 **Modular Architecture**:
+  - `agents/` - AI agent implementations
+  - `system/` - Core system components  
+  - `workflows/` - Automation workflows
+  - `policies/` - Security and governance
+  - `docs/` - Documentation
+
+### 🔄 Currently Active
+
+- 🤖 Agent framework development
+- 📋 Workflow automation system
+- 🔐 Security policies implementation
+- 📖 Documentation expansion
 
 ## 🚀 Quick Start
-
-### Prerequisites
-- Python 3.11+
-- pip or uv
-
-### Installation
 
 ```bash
 # Clone the repository
 git clone https://github.com/Dannysoy2800/danny-ai-os.git
 cd danny-ai-os
 
+# Set up environment
+cp .env.example .env
+# Edit .env with your configuration
+
 # Install dependencies
 pip install -r requirements.txt
 
-# (Optional) Setup environment
-cp .env.example .env
-# Edit .env with your API keys
-```
-
-### Run the System
-
-```bash
-# Run the basic demo
+# Run the application
 python app.py
 
-# Or use the Makefile
-make run
+# Or use Make commands
+make install    # Install dependencies
+make run        # Run the application
+make test       # Run tests (when available)
 ```
 
-## 📐 Architecture
+## 📁 Project Architecture
 
 ```
 danny-ai-os/
-├── system/          Master system prompt (single source of truth)
-├── agents/          Agent definitions (delta-based only)
-├── policies/        Memory & tool policies
-├── workflows/       Reusable task workflows
-├── docs/            Documentation & guides
-├── app.py           Entry point
-├── requirements.txt Dependencies
-└── Makefile         Development utilities
+├── agents/              # AI agent implementations
+├── system/              # Core system components
+├── workflows/           # Automation workflows  
+├── policies/            # Security & governance
+├── docs/                # Documentation
+├── .github/             # GitHub workflows
+├── app.py              # Main application
+├── Makefile            # Build system
+├── requirements.txt    # Python dependencies
+├── LICENSE.md          # MIT License
+└── README.md           # This file
 ```
 
-### How It Works
+## 🎯 Features & Roadmap
 
-1. **System Prompt** (`system/`) defines core behavior and constraints
-2. **Agents** (`agents/`) add specialized capabilities as deltas
-3. **Policies** (`policies/`) manage memory, tools, and rate limits
-4. **Workflows** (`workflows/`) orchestrate multi-step tasks
-5. **LangGraph** coordinates execution with state management
+### ✅ Current Features
+- 🏗️ Modular architecture
+- 🔧 Development environment setup
+- 📋 Project documentation
+- 🔒 Security-first approach
 
-## 🛠️ Development
+### 🔄 In Development  
+- 🤖 Agent communication system
+- 🔄 Workflow orchestration
+- 💾 Memory management
+- 🌐 API integrations
 
-### Setup Development Environment
+### 📋 Planned Features
+- 🗣️ Voice interface integration
+- 📊 Dashboard and monitoring
+- 🔌 Plugin ecosystem
+- ☁️ Cloud deployment options
 
-```bash
-# Install with development dependencies
-make install-dev
-
-# Run tests
-make test
-
-# Format code
-make format
-
-# Check code quality
-make lint
-```
-
-### Project Rules
-
-1. **Precedence**: Safety > Core > Agent > Task > Memory
-2. **Agents add capabilities**, never override the core system
-3. **Runtime data** (logs, memory) stays out of version control
-4. Follow [CONTRIBUTING.md](CONTRIBUTING.md) for PRs
-
-## 📚 Documentation
-
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines & standards
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Deep dive into system design
-- **[docs/AGENTS.md](docs/AGENTS.md)** - Agent development guide
-- **[docs/API.md](docs/API.md)** - API reference
-
-## 🔐 Safety & Security
-
-- Commit signing required (`git commit -S`)
-- Dependency scanning with Dependabot
-- No secrets in version control (use `.env`)
-- Regular security audits via CI/CD
-
-## 📦 Dependencies
-
-### Core
-- **langgraph** - State graph orchestration
-- **langchain** - LLM framework
-- **openai** - OpenAI API client
-- **pydantic** - Data validation
-
-### Data
-- **pandas** - Data manipulation
-- **numpy** - Numerical computing
-
-### Utilities
-- **python-dotenv** - Environment management
-- **pyyaml** - Configuration files
-- **colorlog** - Enhanced logging
-
-See [requirements.txt](requirements.txt) for full list.
-
-## 🤝 Contributing
-
-We welcome contributions! Please:
-
-1. Read [CONTRIBUTING.md](CONTRIBUTING.md)
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit with sign-off: `git commit -S -m "feat: description"`
-4. Push and open a PR
-
-## 📋 Roadmap
-
-- [ ] Multi-turn conversation memory
-- [ ] Tool calling system
-- [ ] Persistent knowledge base
-- [ ] Production deployment guide
-- [ ] Docker support
+## 🏷️ Topics
+`ai` `ai-agent` `automation` `langgraph` `llm` `openai` `personal-ai` `python`
 
 ## 📄 License
+This project is licensed under the [MIT License](LICENSE.md).
 
-MIT License - see [LICENSE.md](LICENSE.md)
-
-## 👤 Author
-
-**Dannysoy2800** - [GitHub](https://github.com/Dannysoy2800)
+## 🤝 Contributing
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
-
-**Questions?** Open an [issue](https://github.com/Dannysoy2800/danny-ai-os/issues) or check the [docs](docs/).
+*Empowering personal productivity through intelligent automation* 🚀
