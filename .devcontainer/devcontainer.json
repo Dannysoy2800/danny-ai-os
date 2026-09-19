@@ -1,0 +1,13 @@
+{
+  "name": "Danny AI OS",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
+  "postCreateCommand": "python -m pip install --upgrade pip && pip install -r requirements.txt && pip install -r requirements-bot.txt",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance"
+      ]
+    }
+  }
+}
