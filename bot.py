@@ -1,10 +1,12 @@
 import logging
 import os
 
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
 
+load_dotenv()
 logging.basicConfig(level=logging.INFO)
 
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
