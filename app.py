@@ -1,18 +1,31 @@
 from typing import TypedDict
-from langgraph.graph import StateGraph, END
+
+from langgraph.graph import END, StateGraph
+
 
 class State(TypedDict):
     message: str
 
-def manager(state: State):
+
+def manager(state: State) -> State:
     print("🧠 Manager:", state["message"])
     return state
 
-builder = StateGraph(State)
-builder.add_node("manager", manager)
-builder.set_entry_point("manager")
-builder.add_edge("manager", END)
 
-graph = builder.compile()
+def build_graph():
+    builder = StateGraph(State)
+    builder.add_node("manager", manager)
+    builder.set_entry_point("manager")
+    builder.add_edge("manager", END)
+    return builder.compile()
 
-graph.invoke({"message": "Hello Danny AI OS!"})
+
+graph = build_graph()
+
+
+def main() -> None:
+    graph.invoke({"message": "Hello Danny AI OS!"})
+
+
+if __name__ == "__main__":
+    main()
