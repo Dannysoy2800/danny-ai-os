@@ -5,7 +5,6 @@
 name: SLSA generic generator
 
 on:
-  workflow_dispatch:
   release:
     types: [created]
 
@@ -15,6 +14,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       digests: ${{ steps.hash.outputs.hashes }}
 
@@ -24,15 +25,18 @@ jobs:
       - name: Build artifacts
         run: |
           set -euo pipefail
-          echo "artifact1" > artifact1
-          echo "artifact2" > artifact2
+          git archive --format=tar.gz --prefix=danny-ai-os/ "${GITHUB_SHA}" > danny-ai-os-source.tar.gz
 
       - name: Generate subject for provenance
         id: hash
         run: |
           set -euo pipefail
-          files=(artifact*)
-          echo "hashes=$(sha256sum "${files[@]}" | base64 -w0)" >> "${GITHUB_OUTPUT}"
+          echo "hashes=$(sha256sum danny-ai-os-source.tar.gz | base64 -w0)" >> "${GITHUB_OUTPUT}"
+
+      - name: Attach source archive to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" danny-ai-os-source.tar.gz --clobber
 
   provenance:
     needs: [build]
