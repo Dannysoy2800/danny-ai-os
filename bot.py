@@ -39,7 +39,9 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        "/start - Assistant शुरू करें\n" "/help - मदद देखें\n\n" "कोई भी message भेजकर सवाल पूछें।"
+        "/start - Assistant शुरू करें\n"
+        "/help - मदद देखें\n\n"
+        "कोई भी message भेजकर सवाल पूछें।"
     )
 
 
