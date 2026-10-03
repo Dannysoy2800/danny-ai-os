@@ -12,8 +12,17 @@ logging.basicConfig(level=logging.INFO)
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
 
-client = AsyncOpenAI(api_key=OPENAI_API_KEY)
+
+def create_openai_client(api_key: str, base_url: str | None = None) -> AsyncOpenAI:
+    options = {"api_key": api_key}
+    if base_url:
+        options["base_url"] = base_url
+    return AsyncOpenAI(**options)
+
+
+client = create_openai_client(OPENAI_API_KEY, OPENAI_BASE_URL)
 SYSTEM_PROMPT = (
     "You are Danny AI Assistant, a helpful and safe personal assistant. "
     "Reply in the same language as the user. Be concise and practical. "
