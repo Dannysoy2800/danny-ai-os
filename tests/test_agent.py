@@ -1,6 +1,5 @@
 from agents.core import Agent
 from agents.skills import build_default_skills
-from agents.delegation import FreeFirstDelegator
 
 
 def test_default_skills_are_registered_and_block_without_integrations():
