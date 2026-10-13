@@ -30,7 +30,7 @@ def test_local_tool_is_preferred_and_quality_checked():
 
 
 def test_failed_local_falls_back_to_free_tool_with_bounded_retries():
-    local = FakeTool("local", 0, "local", error="offline")
+    local = FakeTool("local", 0, "local", error="offline token=secret")
     free = FakeTool("free", 0, "free", "answer")
     result = FreeFirstDelegator([free, local], max_retries=2).delegate("task")
     assert result.status == "completed"
@@ -38,6 +38,8 @@ def test_failed_local_falls_back_to_free_tool_with_bounded_retries():
     assert result.attempts == 3
     assert local.calls == 2
     assert free.calls == 1
+    assert result.errors == ["local: RuntimeError", "local: RuntimeError"]
+    assert all("secret" not in error for error in result.errors)
 
 
 def test_paid_tool_is_never_selected():
@@ -47,11 +49,30 @@ def test_paid_tool_is_never_selected():
     assert paid.calls == 0
 
 
-def test_quality_rejection_does_not_report_success():
+def test_quality_rejection_retries_same_adapter_before_failing_over():
+    tool = FakeTool("free", 0, "free", "answer")
+    review_calls = 0
+
+    def reviewer(task, output):
+        nonlocal review_calls
+        review_calls += 1
+        return review_calls == 2
+
+    result = FreeFirstDelegator([tool], reviewer=reviewer, max_retries=2).delegate("task")
+    assert result.status == "completed"
+    assert result.quality_checked is True
+    assert result.attempts == 2
+    assert tool.calls == 2
+    assert result.errors == ["free: quality review rejected output"]
+
+
+def test_quality_rejection_does_not_report_success_after_retry_budget():
     tool = FakeTool("free", 0, "free", "unverified answer")
-    result = FreeFirstDelegator([tool], reviewer=lambda task, output: False, max_retries=1).delegate("task")
+    result = FreeFirstDelegator([tool], reviewer=lambda task, output: False, max_retries=2).delegate("task")
     assert result.status == "failed"
     assert result.output is None
+    assert tool.calls == 2
+    assert len(result.errors) == 2
 
 
 def test_empty_output_is_rejected():
@@ -59,3 +80,4 @@ def test_empty_output_is_rejected():
     result = FreeFirstDelegator([tool], max_retries=1).delegate("task")
     assert result.status == "failed"
     assert result.output is None
+    assert result.errors == ["free: ValueError"]
