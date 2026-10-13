@@ -3,7 +3,7 @@
 No network clients or paid providers are enabled by default. Integrations must be
 explicitly registered by the application.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable, Protocol
 
 
@@ -11,6 +11,7 @@ class ToolAdapter(Protocol):
     name: str
     priority: int
     cost_tier: str  # "local" or "free"; paid adapters are deliberately excluded.
+
     def run(self, task: str) -> str: ...
 
 
@@ -22,6 +23,7 @@ class DelegationResult:
     attempts: int = 0
     error: str | None = None
     quality_checked: bool = False
+    errors: list[str] = field(default_factory=list)
 
 
 class FreeFirstDelegator:
@@ -61,14 +63,14 @@ class FreeFirstDelegator:
                     if self.reviewer is not None:
                         if not self.reviewer(task, output):
                             errors.append(f"{tool.name}: quality review rejected output")
-                            break
+                            continue
                         return DelegationResult(
                             "completed", output, tool.name, attempts,
-                            quality_checked=True,
+                            quality_checked=True, errors=errors.copy(),
                         )
                     return DelegationResult(
                         "completed", output, tool.name, attempts,
-                        quality_checked=False,
+                        quality_checked=False, errors=errors.copy(),
                     )
                 except Exception as exc:
                     # Avoid exposing arbitrary exception text in user-facing output.
@@ -76,4 +78,5 @@ class FreeFirstDelegator:
         return DelegationResult(
             "failed", None, attempts=attempts,
             error="All configured local/free tools failed or failed quality review.",
+            errors=errors,
         )
