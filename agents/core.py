@@ -1,7 +1,7 @@
 """Minimal self-hosted agent runtime with pluggable skills."""
-
 from dataclasses import dataclass, field
 from typing import Any, Callable
+
 
 @dataclass
 class AgentResult:
@@ -11,6 +11,7 @@ class AgentResult:
     attempts: int = 0
     error: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
 
 class Agent:
     def __init__(self) -> None:
@@ -31,6 +32,22 @@ class Agent:
         if handler is None:
             return AgentResult("failed", None, skill=skill, error=f"Unknown skill: {skill}")
         try:
-            return AgentResult("completed", handler(task), skill=skill, attempts=1)
+            outcome = handler(task)
+            outcome_status = getattr(outcome, "status", "completed")
+            outcome_output = getattr(outcome, "output", outcome)
+            outcome_error = getattr(outcome, "error", None)
+            attempts = getattr(outcome, "attempts", 1)
+            metadata = {
+                "tool": getattr(outcome, "tool", None),
+                "quality_checked": getattr(outcome, "quality_checked", False),
+            }
+            return AgentResult(
+                outcome_status, outcome_output, skill=skill,
+                attempts=attempts, error=outcome_error, metadata=metadata,
+            )
         except Exception as exc:
-            return AgentResult("failed", None, skill=skill, attempts=1, error=str(exc))
+            # Do not leak provider exception details to callers.
+            return AgentResult(
+                "failed", None, skill=skill, attempts=1,
+                error=f"Skill handler failed: {type(exc).__name__}",
+            )
