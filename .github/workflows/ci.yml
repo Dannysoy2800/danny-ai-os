@@ -36,7 +36,7 @@ jobs:
         run: python -m compileall -q .
 
       - name: Run tests with coverage
-        run: python -m pytest -v --cov=app --cov-report=term-missing
+        run: python -m pytest -v --cov=. --cov-report=term-missing
 
       - name: Run application smoke test
         run: python app.py
