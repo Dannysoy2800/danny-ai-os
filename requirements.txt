@@ -9,7 +9,6 @@ requests>=2.34.2
 
 # Data Processing
 pandas>=2.2.0
-requests>=2.32.0
 numpy>=1.24.0
 
 # Utilities
@@ -24,10 +23,4 @@ aiohttp>=3.14.1
 colorlog>=6.11.0
 
 # Development (optional)
-# Uncomment these for development:
-# pytest>=7.4.0
-# pytest-cov>=4.1.0
-# black>=23.0.0
-# flake8>=6.0.0
-# mypy>=1.4.0
-# pre-commit>=3.3.0
+# Install requirements-dev.txt for testing, linting, and formatting tools.
