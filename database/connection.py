@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Iterator
 
 from sqlalchemy import Engine, create_engine, event
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 DEFAULT_DB_PATH = ".personal_ai_os/auth.sqlite3"
@@ -28,8 +29,15 @@ def database_url() -> str:
 def create_database_engine(url: str | None = None) -> Engine:
     """Create a SQLite engine with foreign-key enforcement enabled."""
     resolved_url = url or database_url()
+    parsed_url = make_url(resolved_url)
+    if parsed_url.get_backend_name() != "sqlite":
+        raise ValueError(
+            "The authentication database currently supports SQLite only; "
+            f"received dialect {parsed_url.get_backend_name()!r}."
+        )
+
     kwargs: dict[str, object] = {"pool_pre_ping": True}
-    if resolved_url.endswith(":memory:"):
+    if parsed_url.database in (None, "", ":memory:"):
         from sqlalchemy.pool import StaticPool
 
         kwargs.update(
