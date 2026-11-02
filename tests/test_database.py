@@ -4,7 +4,7 @@ from datetime import date
 from unittest.mock import patch
 
 from sqlalchemy import inspect, text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, StatementError
 from sqlalchemy.orm import Session
 
 from database.connection import create_database_engine, create_session_factory
@@ -93,7 +93,7 @@ class DatabaseFoundationTests(unittest.TestCase):
                 session.add(user)
                 session.flush()
                 session.add(TwoFactorMethod(user_id=user.id, encrypted_secret="seed"))
-                with self.assertRaises(RuntimeError):
+                with self.assertRaises(StatementError):
                     session.commit()
                 session.rollback()
 
