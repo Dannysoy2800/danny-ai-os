@@ -15,7 +15,7 @@ from sqlalchemy import (
     String,
     UniqueConstraint,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, validates
 
 
 def utc_now() -> datetime:
@@ -97,6 +97,7 @@ class TwoFactorMethod(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
+    # Store only output from database.security.encrypt_totp_secret().
     encrypted_secret: Mapped[str | None] = mapped_column(String(512), nullable=True)
     enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
@@ -133,7 +134,10 @@ class PasswordResetToken(Base):
 
 class GuestUsage(Base):
     __tablename__ = "guest_usage"
-    __table_args__ = (UniqueConstraint("guest_key_hash", "usage_date", name="uq_guest_usage_day"),)
+    __table_args__ = (
+        UniqueConstraint("guest_key_hash", "usage_date", name="uq_guest_usage_day"),
+        CheckConstraint("request_count >= 0", name="ck_guest_usage_request_count_nonnegative"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
     guest_key_hash: Mapped[str] = mapped_column(String(64), nullable=False)
@@ -145,9 +149,35 @@ class AuditLog(Base):
     __tablename__ = "audit_logs"
     __table_args__ = (Index("ix_audit_logs_user_created", "user_id", "created_at"),)
 
+    # Only non-sensitive, explicitly allowlisted metadata may be stored here.
+    _DETAIL_KEYS = frozenset({
+        "provider", "reason_code", "method", "role",
+        "resource_type", "resource_id", "status_code",
+    })
+
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     event_type: Mapped[str] = mapped_column(String(80), nullable=False)
     outcome: Mapped[str] = mapped_column(String(30), nullable=False)
     details: Mapped[dict[str, object] | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
+
+    @validates("details")
+    def validate_details(self, _key: str, value: dict[str, object] | None) -> dict[str, object] | None:
+        """Reject unapproved keys and complex values that could carry secrets."""
+        if value is None:
+            return None
+        if not isinstance(value, dict):
+            raise ValueError("Audit details must be a dictionary.")
+        unknown = set(value) - self._DETAIL_KEYS
+        if unknown:
+            raise ValueError(f"Audit details contain non-allowlisted keys: {sorted(unknown)}")
+        clean: dict[str, object] = {}
+        for key, item in value.items():
+            if item is None or isinstance(item, (bool, int)):
+                clean[key] = item
+            elif isinstance(item, str) and len(item) <= 120:
+                clean[key] = item
+            else:
+                raise ValueError(f"Unsupported or oversized audit detail value for {key!r}.")
+        return clean
