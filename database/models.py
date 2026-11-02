@@ -14,12 +14,35 @@ from sqlalchemy import (
     JSON,
     String,
     UniqueConstraint,
+    DDL,
+    event,
 )
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.types import TypeDecorator
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, validates
 
 
 def utc_now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+class EncryptedTOTPSecret(TypeDecorator):
+    """Encrypt TOTP seeds on every ORM write and decrypt them on ORM reads."""
+
+    impl = String(512)
+    cache_ok = True
+
+    def process_bind_param(self, value: str | None, dialect: object) -> str | None:
+        if value is None:
+            return None
+        from database.security import encrypt_totp_secret
+        return encrypt_totp_secret(value)
+
+    def process_result_value(self, value: str | None, dialect: object) -> str | None:
+        if value is None:
+            return None
+        from database.security import decrypt_totp_secret
+        return decrypt_totp_secret(value)
 
 
 class Base(DeclarativeBase):
@@ -97,8 +120,8 @@ class TwoFactorMethod(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False)
-    # Store only output from database.security.encrypt_totp_secret().
-    encrypted_secret: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    # ORM exposes plaintext to trusted application code; SQL storage is always encrypted.
+    encrypted_secret: Mapped[str | None] = mapped_column(EncryptedTOTPSecret(), nullable=True)
     enabled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
@@ -159,7 +182,7 @@ class AuditLog(Base):
     user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     event_type: Mapped[str] = mapped_column(String(80), nullable=False)
     outcome: Mapped[str] = mapped_column(String(30), nullable=False)
-    details: Mapped[dict[str, object] | None] = mapped_column(JSON, nullable=True)
+    details: Mapped[dict[str, object] | None] = mapped_column(MutableDict.as_mutable(JSON), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
     @validates("details")
@@ -181,3 +204,49 @@ class AuditLog(Base):
             else:
                 raise ValueError(f"Unsupported or oversized audit detail value for {key!r}.")
         return clean
+
+
+# Enforce the audit metadata allowlist in SQLite itself. This also covers direct SQL
+# and bulk writes that bypass SQLAlchemy attribute validators.
+_AUDIT_DETAILS_INSERT_TRIGGER = DDL("""
+CREATE TRIGGER IF NOT EXISTS trg_audit_details_validate_insert
+BEFORE INSERT ON audit_logs
+WHEN NEW.details IS NOT NULL
+BEGIN
+    SELECT CASE WHEN json_valid(NEW.details) = 0
+        OR json_type(NEW.details) != 'object'
+        THEN RAISE(ABORT, 'audit details must be a JSON object') END;
+    SELECT CASE WHEN EXISTS (
+        SELECT 1 FROM json_each(NEW.details)
+        WHERE key NOT IN (
+            'provider', 'reason_code', 'method', 'role',
+            'resource_type', 'resource_id', 'status_code'
+        )
+        OR type NOT IN ('null', 'true', 'false', 'integer', 'text')
+        OR (type = 'text' AND length(value) > 120)
+    ) THEN RAISE(ABORT, 'audit details contain disallowed data') END;
+END;
+""").execute_if(dialect="sqlite")
+
+_AUDIT_DETAILS_UPDATE_TRIGGER = DDL("""
+CREATE TRIGGER IF NOT EXISTS trg_audit_details_validate_update
+BEFORE UPDATE OF details ON audit_logs
+WHEN NEW.details IS NOT NULL
+BEGIN
+    SELECT CASE WHEN json_valid(NEW.details) = 0
+        OR json_type(NEW.details) != 'object'
+        THEN RAISE(ABORT, 'audit details must be a JSON object') END;
+    SELECT CASE WHEN EXISTS (
+        SELECT 1 FROM json_each(NEW.details)
+        WHERE key NOT IN (
+            'provider', 'reason_code', 'method', 'role',
+            'resource_type', 'resource_id', 'status_code'
+        )
+        OR type NOT IN ('null', 'true', 'false', 'integer', 'text')
+        OR (type = 'text' AND length(value) > 120)
+    ) THEN RAISE(ABORT, 'audit details contain disallowed data') END;
+END;
+""").execute_if(dialect="sqlite")
+
+event.listen(AuditLog.__table__, "after_create", _AUDIT_DETAILS_INSERT_TRIGGER)
+event.listen(AuditLog.__table__, "after_create", _AUDIT_DETAILS_UPDATE_TRIGGER)
