@@ -15,3 +15,6 @@ memory/
 .idea/
 .DS_Store
 node_modules/
+
+# Local application databases and private state
+.personal_ai_os/
