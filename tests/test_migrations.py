@@ -86,7 +86,7 @@ class DatabaseMigrationTests(unittest.TestCase):
         command.downgrade(self._config(), "base")
         engine = create_database_engine()
         try:
-            self.assertEqual(inspect(engine).get_table_names(), [])
+            self.assertEqual(set(inspect(engine).get_table_names()) - {"alembic_version"}, set())
         finally:
             engine.dispose()
 
