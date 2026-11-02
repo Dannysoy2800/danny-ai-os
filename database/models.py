@@ -1,7 +1,7 @@
 """SQLAlchemy models for the authentication foundation."""
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
 from sqlalchemy import (
     Boolean,
@@ -137,7 +137,7 @@ class GuestUsage(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     guest_key_hash: Mapped[str] = mapped_column(String(64), nullable=False)
-    usage_date: Mapped[datetime] = mapped_column(Date, nullable=False)
+    usage_date: Mapped[date] = mapped_column(Date, nullable=False)
     request_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
 
